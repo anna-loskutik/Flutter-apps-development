@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'cubit/main_screen_cubit.dart';
 import 'cubit/main_screen_state.dart';
+import 'history_screen.dart'; 
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -22,6 +23,16 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: const Text('Лоскутникова Анна Алексеевна'), 
         backgroundColor: Colors.blue,
+        leading: IconButton(
+          icon: const Icon(Icons.list),
+          tooltip: 'История расчётов',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HistoryScreen()),
+            );
+          },
+        ),
       ),
       body: Container(
         padding: const EdgeInsets.all(16.0),
@@ -40,7 +51,9 @@ class _MainScreenState extends State<MainScreen> {
                 decoration: const InputDecoration(labelText: 'Число a'),
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Введите число a';
-                  if (double.tryParse(value) == null) return 'Введите корректное число';
+                  if (double.tryParse(value) == null) {
+                    return 'Введите корректное число';
+                  }
                   return null;
                 },
               ),
@@ -51,7 +64,9 @@ class _MainScreenState extends State<MainScreen> {
                 decoration: const InputDecoration(labelText: 'Число b'),
                 validator: (value) {
                   if (value == null || value.isEmpty) return 'Введите число b';
-                  if (double.tryParse(value) == null) return 'Введите корректное число';
+                  if (double.tryParse(value) == null) {
+                    return 'Введите корректное число';
+                  }
                   return null;
                 },
               ),
@@ -67,31 +82,35 @@ class _MainScreenState extends State<MainScreen> {
                 controlAffinity: ListTileControlAffinity.leading,
               ),
               const SizedBox(height: 20),
-              
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate() && _agreement) {
-                    BlocProvider.of<MainScreenCubit>(context).calculate(
+                    await BlocProvider.of<MainScreenCubit>(context).calculate(
                       double.parse(_controllerA.text),
                       double.parse(_controllerB.text),
                     );
                   } else if (!_agreement) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Поставьте галочку согласия!')),
+                      const SnackBar(
+                        content: Text('Поставьте галочку согласия!'),
+                      ),
                     );
                   }
                 },
                 child: const Text('Рассчитать'),
               ),
-              
-              const SizedBox(height: 30),
 
+              const SizedBox(height: 30),
               BlocBuilder<MainScreenCubit, MainScreenState>(
                 builder: (context, state) {
                   if (state is MainScreenUpdateState) {
                     return Text(
                       'Результат: ${state.result}',
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green),
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
                     );
                   }
                   return const SizedBox.shrink();
